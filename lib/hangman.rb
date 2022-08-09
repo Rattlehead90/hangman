@@ -39,22 +39,24 @@ class Game
   end
 
   def input_guess
-    gets.chomp.downcase.gsub(/\s+/, "")
+    gets.chomp.downcase.gsub(/\s+/, '')
   end
 
   def guess
     puts 'Input your letter below: '
     guess = input_guess
-    until guess.length == 1 && guess.ord.between?(97, 122)
-      puts 'Invalid letter. Ensure you enter !one! !english! letter: '
+    until guess.length == 1 &&
+          guess.ord.between?(97, 122) &&
+          !@letters_tried.split(' ').include?(guess.upcase)
+      puts 'Invalid letter. Ensure you enter !one! !english! letter that you\'ve !not used!: '
       guess = input_guess
     end
     check(guess)
   end
 
-  def check(guess) 
+  def check(guess)
     not_included = true
-    @word.split('').each_with_index do |letter, index| 
+    @word.split('').each_with_index do |letter, index|
       if letter == guess
         @hidden_word[index * 2] = letter
         not_included = false
