@@ -38,12 +38,16 @@ class Game
     puts "Tried letters: #{@letters_tried}"
   end
 
+  def input_guess
+    gets.chomp.downcase.gsub(/\s+/, "")
+  end
+
   def guess
     puts 'Input your letter below: '
-    guess = gets.chomp.downcase
+    guess = input_guess
     until guess.length == 1 && guess.ord.between?(97, 122)
       puts 'Invalid letter. Ensure you enter !one! !english! letter: '
-      guess = gets.chomp.downcase
+      guess = input_guess
     end
     check(guess)
   end
@@ -56,9 +60,11 @@ class Game
         not_included = false
       end
     end
-    if not_included
-      @letters_tried << (guess.upcase + ' ')
-    end
+    @letters_tried << ("#{guess.upcase} ") if not_included
+  end
+
+  def won
+    !@hidden_word.include?('_')
   end
 
   def play
@@ -66,7 +72,9 @@ class Game
     until @turn == 12
       display_turns
       guess
+      break if won
     end
+    puts won ? 'Congratulations! You have won the game.' : "Game over! The word was #{@word}"
   end
 end
 
