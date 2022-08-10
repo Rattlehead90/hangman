@@ -1,4 +1,5 @@
 require 'pry-byebug'
+require 'yaml'
 
 # holds dictionary.txt and fetches a word
 class Dictionary
@@ -33,7 +34,7 @@ class Game
 
   def display_turns
     @turn += 1
-    puts "#{12 - @turn} turns left}"
+    puts "#{12 - @turn} turns left"
     puts @hidden_word
     puts "Tried letters: #{@letters_tried}"
   end
@@ -62,17 +63,62 @@ class Game
         not_included = false
       end
     end
-    @letters_tried << ("#{guess.upcase} ") if not_included
+    @letters_tried << ("#{guess.upcase} ")
   end
 
   def won
     !@hidden_word.include?('_')
   end
 
+  def save
+    puts 'Would you like to save the game? Y or N: '
+    answer = gets.chomp.upcase
+    until answer.include?('Y') || answer.include?('N')
+      puts 'Error: please enter Y or N: '
+      answer = gets.chomp.upcase
+    end
+    if answer == 'Y'
+      Dir.mkdir('saves') unless Dir.exist?('saves')
+      to_yaml
+    end
+  end
+
+  def to_yaml
+    save_string = YAML.dump({
+                              turn: @turn,
+                              hidden_word: @hidden_word,
+                              word: @word,
+                              letters_tried: @letters_tried
+    })
+    File.open('saves/save_file.yaml', 'w') { |f| f.write(save_string)}
+    puts '////////////Game Saved////////////'
+  end
+
+  def from_yaml
+    save = YAML.load_file('saves/save_file.yaml')
+    @turn = save[:turn] - 1
+    @hidden_word = save[:hidden_word]
+    @word = save[:word]
+    @letters_tried = save[:letters_tried]
+    puts '////////////Game Loaded////////////'
+  end
+
+  def load?
+    puts 'Would you like to start from the last save? Y or N: '
+    answer = gets.chomp.upcase
+    until answer.include?('Y') || answer.include?('N')
+      puts 'Error: please enter Y or N: '
+      answer = gets.chomp.upcase
+    end
+    from_yaml if answer == 'Y'
+  end
+
   def play
     puts greetings
+    load?
     until @turn == 12
       display_turns
+      save unless @turn == 1
       guess
       break if won
     end
